@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>¿Quieres ser mi San Valentín?</title>
+
+  <style>
+    body{
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      color: #fff;
+    }
+
+    .card{
+      max-width: 520px;
+      margin: 0 auto;
+      background: rgba(0,0,0,0.15);
+      border-radius: 20px;
+      padding: 22px;
+      backdrop-filter: blur(4px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    img{
+      width: 260px;
+      max-width: 90%;
+      border-radius: 20px;
+      margin: 12px auto;
+      display: block;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      transition: transform 0.3s ease;
+    }
+
+    .btns{
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button{
+      padding: 14px 22px;
+      font-size: 18px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      color: white;
+      user-select: none;
+    }
+
+    #btnSi{ background: #ff4d6d; }
+    #btnNo{ background: rgba(255,255,255,0.25); }
+
+    #mensajeNo{ display:none; margin-bottom: 12px; }
+
+    /* Confirmación */
+    #confirmWrap{ display:none; margin-top: 10px; }
+    #confirmTitulo{ font-size: 24px; font-weight: bold; margin: 8px 0 12px; }
+    #btnSiSeguro{ background:#ff4d6d; }
+
+    /* NO que huye */
+    #btnNoEscapa{
+      display:none;
+      background: rgba(255,255,255,0.25);
+      position: absolute;
+      left: 50%;
+      top: 80%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Mensaje final con tiempo */
+    #mensajeFinal{
+      display:none;
+      margin-top: 16px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    #tiempoTexto{
+      margin-top: 8px;
+      font-size: 16px;
+      font-weight: normal;
+      opacity: 0.95;
+    }
+
+    /* Pantalla final limpia */
+    #finalScreen{ display:none; }
+    #finalTitulo{
+      font-size: 32px;  /* igual que Hola */
+      font-weight: bold;
+      margin-top: 8px;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+    #imgFinal{
+      width: 330px;
+      max-width: 95%;
+      border-radius: 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      margin: 0 auto;
+      display:block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card" id="card">
+
+    <!-- BLOQUE NORMAL -->
+    <div id="normalScreen">
+      <div id="textoInicial">
+        <h1>Hola 💖</h1>
+        <p>Quería preguntarte algo especial…</p>
+        <h2>¿Quieres ser mi San Valentín? 🌹</h2>
+      </div>
+
+      <div id="mensajeNo">
+        <h1>¿Qué? ¿Cómo que no? 😒</h1>
+        <p>cuidadito he…</p>
+        <h2>mejor piénsalo bien</h2>
+      </div>
+
+      <img id="imgPrincipal" src="foto1.JPEG" alt="Foto">
+
+      <div class="btns" id="botones">
+        <button id="btnSi" type="button">Sí 💕</button>
+        <button id="btnNo" type="button">No 🙈</button>
+      </div>
+
+      <div id="confirmWrap">
+        <div id="confirmTitulo">¿Estás segura? 😳</div>
+        <div class="btns">
+          <button id="btnSiSeguro" type="button">Sí, segura ✅</button>
+        </div>
+      </div>
+
+      <button id="btnNoEscapa" type="button">No 😅</button>
+
+      <!-- MENSAJE FINAL CON TIEMPO -->
+      <div id="mensajeFinal">
+        💖 Sabía que dirías que sí 💖
+        <div id="tiempoTexto"></div>
+      </div>
+    </div>
+
+    <!-- BLOQUE FINAL LIMPIO -->
+    <div id="finalScreen">
+      <div id="finalTitulo">📸 CAPTURA ESTA IMAGEN<br>PARA NUESTRA CITA DE SAN VALENTÍN 💘</div>
+      <img id="imgFinal" src="foto3.jpeg" alt="Foto final">
+    </div>
+
+  </div>
+
+  <script>
+    const card = document.getElementById("card");
+
+    const normalScreen = document.getElementById("normalScreen");
+    const finalScreen  = document.getElementById("finalScreen");
+
+    const img = document.getElementById("imgPrincipal");
+
+    const btnSi = document.getElementById("btnSi");
+    const btnNo = document.getElementById("btnNo");
+    const botones = document.getElementById("botones");
+
+    const textoInicial = document.getElementById("textoInicial");
+    const mensajeNo = document.getElementById("mensajeNo");
+
+    const confirmWrap = document.getElementById("confirmWrap");
+    const btnSiSeguro = document.getElementById("btnSiSeguro");
+    const btnNoEscapa = document.getElementById("btnNoEscapa");
+
+    const mensajeFinal = document.getElementById("mensajeFinal");
+    const tiempoTexto = document.getElementById("tiempoTexto");
+
+    const IMG_1 = "foto1.JPEG";
+    const IMG_2 = "foto2.gif";
+
+    let timer = null;
+
+    // Cronómetro
+    let tiempo = 0;
+    let intervalo = null;
+
+    function iniciarCronometro(){
+      if (intervalo) clearInterval(intervalo);
+      tiempo = 0;
+      tiempoTexto.textContent = "⏱️ 0 segundos...";
+      intervalo = setInterval(() => {
+        tiempo++;
+        tiempoTexto.textContent = `⏱️ ${tiempo} segundos...`;
+      }, 1000);
+    }
+
+    function detenerCronometro(){
+      if (intervalo) {
+        clearInterval(intervalo);
+        intervalo = null;
+      }
+    }
+
+    // NO inicial (foto2 3s y vuelve)
+    btnNo.addEventListener("click", () => {
+      detenerCronometro();
+
+      textoInicial.style.display = "none";
+      botones.style.display = "none";
+      confirmWrap.style.display = "none";
+      btnNoEscapa.style.display = "none";
+      mensajeFinal.style.display = "none";
+
+      mensajeNo.style.display = "block";
+      img.src = IMG_2;
+      img.style.transform = "scale(1.1)";
+
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        textoInicial.style.display = "block";
+        botones.style.display = "flex";
+        mensajeNo.style.display = "none";
+        img.src = IMG_1;
+        img.style.transform = "scale(1)";
+      }, 3000);
+    });
+
+    // SI inicial -> confirmación + cronómetro
+    btnSi.addEventListener("click", () => {
+      if (timer) { clearTimeout(timer); timer = null; }
+
+      botones.style.display = "none";
+      mensajeNo.style.display = "none";
+      mensajeFinal.style.display = "none";
+
+      confirmWrap.style.display = "block";
+      btnNoEscapa.style.display = "inline-block";
+      placeNoButton();
+
+      iniciarCronometro();
+    });
+
+    // Sí, segura -> mostrar tiempo + después de 3s mostrar foto3 (pantalla limpia)
+    btnSiSeguro.addEventListener("click", () => {
+      detenerCronometro();
+
+      confirmWrap.style.display = "none";
+      btnNoEscapa.style.display = "none";
+
+      // mostrar el mensaje con el tiempo
+      mensajeFinal.style.display = "block";
+      tiempoTexto.textContent = `😏 Te demoraste ${tiempo} segundos en responder`;
+
+      // después de 3 segundos: pantalla final limpia
+      setTimeout(() => {
+        normalScreen.style.display = "none";
+        finalScreen.style.display = "block";
+      }, 5000);
+    });
+
+    // Botón NO que se escapa
+    function placeNoButton(){
+      const rect = card.getBoundingClientRect();
+      const margin = 20;
+
+      const bw = btnNoEscapa.offsetWidth || 120;
+      const bh = btnNoEscapa.offsetHeight || 48;
+
+      const minX = margin;
+      const maxX = rect.width - bw - margin;
+      const minY = margin;
+      const maxY = rect.height - bh - margin;
+
+      const x = Math.random() * (maxX - minX) + minX;
+      const y = Math.random() * (maxY - minY) + minY;
+
+      btnNoEscapa.style.left = x + "px";
+      btnNoEscapa.style.top = y + "px";
+      btnNoEscapa.style.transform = "none";
+    }
+
+    btnNoEscapa.addEventListener("mouseenter", placeNoButton);
+    btnNoEscapa.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      placeNoButton();
+    }, { passive: false });
+  </script>
+</body>
+</html>
